@@ -12,6 +12,7 @@ Module Module1
     Dim tokenSindicato = ""
     Sub Main()
         getToken()
+        getPreinscripciones()
         Console.ReadKey()
 
     End Sub
@@ -211,30 +212,44 @@ Module Module1
 
     End Function
 
-    Async Sub getToken()
+    Async Sub getPreinscripciones()
         Try
-
+            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones"
             Dim data = New Dictionary(Of String, String)
-            data.Add("_username", "admin777")
-            data.Add("_password", "xxxx4444")
-            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Post, data)
+            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Get, url, data)
             Dim json = JObject.Parse(responseBody)
-            Dim token = json.Item("token")
-            If token Then
-                tokenSindicato = token
-            End If
-
+            Console.WriteLine(json)
         Catch ex As Exception
             Console.WriteLine(ex)
         End Try
     End Sub
-    Async Function sendSindicatoRequest(method As HttpMethod, data As Dictionary(Of String, String)) As Task(Of String)
-
-        Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/user/login_check"
+    Async Sub getToken()
+        Try
+            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/user/login_check"
+            Dim data = New Dictionary(Of String, String)
+            data.Add("_username", "admin777")
+            data.Add("_password", "xxxx4444")
+            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Post, url, data)
+            Dim json = JObject.Parse(responseBody)
+            Dim token = json.Item("token")
+            If token.ToString().Length > 0 Then
+                tokenSindicato = token
+            End If
+            Console.WriteLine(token)
+            Console.ReadKey()
+        Catch ex As Exception
+            Console.WriteLine(ex)
+        End Try
+    End Sub
+    Async Function sendSindicatoRequest(method As HttpMethod, url As String, data As Dictionary(Of String, String)) As Task(Of String)
 
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim req = New HttpRequestMessage(method, url)
-        req.Content = New FormUrlEncodedContent(data)
+        If method = HttpMethod.Post Then
+            req.Content = New FormUrlEncodedContent(data)
+            Console.WriteLine("methodo POST")
+
+        End If
 
         If tokenSindicato <> "" Then
             req.Headers.Add("Authorization", "Bearer " & tokenSindicato)
