@@ -5,11 +5,13 @@ Imports System.Net.Http
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
 
+
+
 Module Module1
 
-    ReadOnly client As HttpClient = New HttpClient()
+    Public ReadOnly client As HttpClient = New HttpClient()
 
-    Dim tokenSindicato = ""
+
     Sub Main()
         getToken()
         getPreinscripciones()
@@ -212,56 +214,7 @@ Module Module1
 
     End Function
 
-    Async Sub getPreinscripciones()
-        Try
-            Dim fecha = "2021-01-27" 'formato año - mes -dia
-            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha=" & fecha
-            ' Si quieres todas utiliza la URL de abajo 
-            'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha="
-            Dim data = New Dictionary(Of String, String)
-            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Get, url, data)
-            Dim json = JObject.Parse(responseBody)
-            Console.WriteLine(json)
-        Catch ex As Exception
-            Console.WriteLine(ex)
-        End Try
-    End Sub
-    Async Sub getToken()
-        Try
-            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/user/login_check"
-            Dim data = New Dictionary(Of String, String)
-            data.Add("_username", "admin777")
-            data.Add("_password", "xxxx4444")
-            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Post, url, data)
-            Dim json = JObject.Parse(responseBody)
-            Dim token = json.Item("token")
-            If token.ToString().Length > 0 Then
-                tokenSindicato = token
-            End If
-            Console.WriteLine(token)
-            Console.ReadKey()
-        Catch ex As Exception
-            Console.WriteLine(ex)
-        End Try
-    End Sub
-    Async Function sendSindicatoRequest(method As HttpMethod, url As String, data As Dictionary(Of String, String)) As Task(Of String)
 
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        Dim req = New HttpRequestMessage(method, url)
-        If method = HttpMethod.Post Then
-            req.Content = New FormUrlEncodedContent(data)
-        End If
-
-        If tokenSindicato <> "" Then
-            req.Headers.Add("Authorization", "Bearer " & tokenSindicato)
-        End If
-
-        Dim response As HttpResponseMessage = Await client.SendAsync(req)
-        response.EnsureSuccessStatusCode()
-        Dim responseBody As String = Await response.Content.ReadAsStringAsync()
-        Return responseBody
-
-    End Function
 
 
     Class errorResponse
@@ -281,4 +234,5 @@ Module Module1
         Public id As Integer
         Public shortname As String
     End Class
+
 End Module
