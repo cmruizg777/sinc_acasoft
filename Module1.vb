@@ -8,19 +8,12 @@ Imports Newtonsoft.Json.Linq
 Module Module1
 
     ReadOnly client As HttpClient = New HttpClient()
-    Sub Main()
-        ' id estudiante de prueba 53, username test 100
-        ' id teacher de prueba 54, username test 200
-        'createUserMoodle()
-        'id de categoria de prueba -> 122  ,Nombre -> Categoria de Prueba
-        'createCategories()
-        'id de curso de prueba -> 3  ,shortname -> CP
-        'createCourses()
-        'enrollUser()
-        getUsers()
-        'deleteUsers()
 
+    Dim tokenSindicato = ""
+    Sub Main()
+        getToken()
         Console.ReadKey()
+
     End Sub
     Async Sub getUsers()
         Try
@@ -99,7 +92,6 @@ Module Module1
             Console.WriteLine(ex)
         End Try
     End Sub
-
     Async Sub createCategories()
         Try
             Dim data = New Dictionary(Of String, String)
@@ -218,6 +210,43 @@ Module Module1
         Return responseBody
 
     End Function
+
+    Async Sub getToken()
+        Try
+
+            Dim data = New Dictionary(Of String, String)
+            data.Add("_username", "admin777")
+            data.Add("_password", "xxxx4444")
+            Dim responseBody = Await sendSindicatoRequest(HttpMethod.Post, data)
+            Dim json = JObject.Parse(responseBody)
+            Dim token = json.Item("token")
+            If token Then
+                tokenSindicato = token
+            End If
+
+        Catch ex As Exception
+            Console.WriteLine(ex)
+        End Try
+    End Sub
+    Async Function sendSindicatoRequest(method As HttpMethod, data As Dictionary(Of String, String)) As Task(Of String)
+
+        Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/user/login_check"
+
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        Dim req = New HttpRequestMessage(method, url)
+        req.Content = New FormUrlEncodedContent(data)
+
+        If tokenSindicato <> "" Then
+            req.Headers.Add("Authorization", "Bearer " & tokenSindicato)
+        End If
+
+        Dim response As HttpResponseMessage = Await client.SendAsync(req)
+        response.EnsureSuccessStatusCode()
+        Dim responseBody As String = Await response.Content.ReadAsStringAsync()
+        Return responseBody
+
+    End Function
+
 
     Class errorResponse
         Public exception As String
