@@ -78,9 +78,9 @@ Module Sindicato
         Public nombres As String
         Public apellidos As String
         ' aqui van los demas campos correo , direccion  , etc aumenta los que necesites
-        'email
-        'username
-        'cedula
+        Public email As String
+        Public username As String
+        Public cedula As String
         'nacionalidad
         'lugarNac
         'direccion
