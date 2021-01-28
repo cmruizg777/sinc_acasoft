@@ -214,7 +214,10 @@ Module Module1
 
     Async Sub getPreinscripciones()
         Try
-            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones"
+            Dim fecha = "2021-01-27" 'formato año - mes -dia
+            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha=" & fecha
+            ' Si quieres todas utiliza la URL de abajo 
+            'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha="
             Dim data = New Dictionary(Of String, String)
             Dim responseBody = Await sendSindicatoRequest(HttpMethod.Get, url, data)
             Dim json = JObject.Parse(responseBody)
@@ -247,8 +250,6 @@ Module Module1
         Dim req = New HttpRequestMessage(method, url)
         If method = HttpMethod.Post Then
             req.Content = New FormUrlEncodedContent(data)
-            Console.WriteLine("methodo POST")
-
         End If
 
         If tokenSindicato <> "" Then
