@@ -94,12 +94,18 @@ Module Sindicato
     Class Servicio
         Public precio As Decimal
         Public curso As Curso
+        Public examen As Examen
         Public requisitos As List(Of Requisito)
+        Public tipo As Integer
+        Public observaciones As String
     End Class
     Class Curso
         Public nombre As String
     End Class
     Class Requisito
         Public descripcion As String
+    End Class
+    Class Examen
+        Public nombre As String
     End Class
 End Module

@@ -95,6 +95,21 @@ Module Module1
             Console.WriteLine(ex)
         End Try
     End Sub
+    Async Sub unenrollUser()
+        Try
+            Dim data = New Dictionary(Of String, String)
+            data.Add("wstoken", "acebcc62c149e567969b459f3085692c")
+            data.Add("moodlewsrestformat", "json")
+            data.Add("wsfunction", "enrol_manual_unenrol_users")
+            data.Add("enrolments[0][userid]", "1973")       ' id del usuario
+            data.Add("enrolments[0][courseid]", "152")     ' id del curso al que se matricula el usuario
+            Dim responseBody = Await sendMoodleRequest(HttpMethod.Post, data)
+            Console.WriteLine(responseBody)
+            ' aqui hay respuesta solo en caso de haber error, si todo sale bien la respuesta es un null
+        Catch ex As Exception
+            Console.WriteLine(ex)
+        End Try
+    End Sub
     Async Sub createCategories()
         Try
             Dim data = New Dictionary(Of String, String)
