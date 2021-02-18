@@ -14,7 +14,8 @@ Module Module1
 
     Sub Main()
         getToken()
-        getPreinscripciones()
+        'getPreinscripciones()
+        downloadFile()
         Console.ReadKey()
 
     End Sub

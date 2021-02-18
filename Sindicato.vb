@@ -1,7 +1,10 @@
-﻿Imports System.Net
+﻿Imports System.IO
+Imports System.Net
 Imports System.Net.Http
+Imports System.Windows.Forms
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
+
 
 Module Sindicato
 
@@ -9,9 +12,15 @@ Module Sindicato
     Async Sub getPreinscripciones()
         Try
             Dim fecha = "2021-01-27" 'formato año - mes -dia
-            Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha=" & fecha
+            Dim id = 7 ' id de la inscripcion
+            'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha=" & fecha
             ' Si quieres todas utiliza la URL de abajo 
             'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_fecha="
+            'Obtener inscripcion por id
+            'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/v1/preinscripciones?_id=" & id
+
+            Dim url = "http://localhost:8000/api/v1/preinscripciones?_id=" & id
+
             Dim data = New Dictionary(Of String, String)
             Dim responseBody = Await sendSindicatoRequest(HttpMethod.Get, url, data)
             Dim json = JObject.Parse(responseBody)
@@ -29,7 +38,7 @@ Module Sindicato
             Else
                 Console.WriteLine("No se encontró inscripciones")
             End If
-            Console.WriteLine(json)
+            'Console.WriteLine(json)
         Catch ex As Exception
             Console.WriteLine(ex)
         End Try
@@ -70,42 +79,42 @@ Module Sindicato
         Return responseBody
 
     End Function
-    Class Inscripcion
-        Public usuario As Usuario
-        Public productoServicio As Servicio
-    End Class
-    Class Usuario
-        Public nombres As String
-        Public apellidos As String
-        ' aqui van los demas campos correo , direccion  , etc aumenta los que necesites
-        Public email As String
-        Public username As String
-        Public cedula As String
-        'nacionalidad
-        'lugarNac
-        'direccion
-        'calle
-        'calle2
-        'referencia
-        'telefono
-        'fechaNac
 
-    End Class
-    Class Servicio
-        Public precio As Decimal
-        Public curso As Curso
-        Public examen As Examen
-        Public requisitos As List(Of Requisito)
-        Public tipo As Integer
-        Public observaciones As String
-    End Class
-    Class Curso
-        Public nombre As String
-    End Class
-    Class Requisito
-        Public descripcion As String
-    End Class
-    Class Examen
-        Public nombre As String
-    End Class
+    Async Sub downloadFile()
+        Try
+            Dim id = 1
+            'Dim url = "https://grupoprosoft.net/sindicato-api/public/index.php/api/user/login_check"
+            Dim url = "http://localhost:8000/api/v1/documentos/download?id=" & id
+            Dim data = New Dictionary(Of String, String)
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            Dim req = New HttpRequestMessage(HttpMethod.Get, url)
+
+            If tokenSindicato <> "" Then
+                req.Headers.Add("Authorization", "Bearer " & tokenSindicato)
+            End If
+            Dim response As HttpResponseMessage = Await client.SendAsync(req)
+            response.EnsureSuccessStatusCode()
+
+            Dim cd = response.Content.Headers.ContentDisposition
+            If (IsNothing(cd)) Then
+                Dim responseBody As String = Await response.Content.ReadAsStringAsync()
+                Dim json = JObject.Parse(responseBody)
+                Console.WriteLine(json)
+            Else
+                Dim filename = cd.FileName
+                Dim path = Environment.GetEnvironmentVariable("USERPROFILE") & "\\Downloads\" & filename
+                Dim responseBody As Byte() = Await response.Content.ReadAsByteArrayAsync()
+
+                Dim fs As FileStream = File.Create(path, responseBody.Length)
+                fs.Write(responseBody, 0, responseBody.Length)
+                fs.Close()
+
+                Console.Write("Archivo Guardado Correctamente en " & path)
+            End If
+
+        Catch ex As Exception
+            Console.WriteLine(ex)
+        End Try
+    End Sub
+
 End Module
